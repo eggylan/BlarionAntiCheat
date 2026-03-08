@@ -1,0 +1,43 @@
+{
+	"format_version": 2,
+	"header": {
+		"name": "§bBlarion Anticheat §av2.1.3 §bRelease§f",
+		"description": "Crasin Anticheat SAPI2.x Uptated version -- Totally New Framework",
+		"uuid": "c68ba0c1-b9e4-46ad-b6c8-88bbd28f1236",
+		"version": [ 2, 1, 3 ],
+		"min_engine_version": [ 1, 21, 0 ]
+	},
+	"metadata": {
+		"authors": [ "NyaCrasin" ],
+		"url": "https://www.bilibili.com/video/BV1Pt421j7tQ"
+	},
+	"modules": [
+		{
+			"type": "data",
+			"uuid": "65cb465f-5952-4e0c-ab29-441f8c2b4587",
+			"version": [ 1, 0, 0 ]
+		},
+		{
+			"description": "Script API",
+			"entry": "scripts/loader.js",
+			"language": "javascript",
+			"type": "script",
+			"uuid": "01439e23-5312-40bc-9d37-3ff60a176925",
+			"version": [ 0, 0, 1 ]
+		}
+	],
+	"dependencies": [
+		{
+			"module_name": "@minecraft/server",
+			"version": "2.5.0"
+		},
+		{
+			"module_name": "@minecraft/server-ui",
+			"version": "2.0.0"
+		},
+		{
+			"module_name": "@minecraft/server-admin",
+			"version": "1.0.0-beta"
+		}
+	]
+}

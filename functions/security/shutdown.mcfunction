@@ -1,0 +1,1 @@
+event entity @a "scythe:kick"

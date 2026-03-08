@@ -1,0 +1,14 @@
+{
+	"format_version": "1.10.0",
+	"animations": {
+		"animation.everyFrame": {
+			"timeline": {
+				"0.0": [
+					"/scoreboard players add @s timerate 0"
+				]
+			},
+			"animation_length": 0.02,
+			"loop": true
+		}
+	}
+}

@@ -1,0 +1,4 @@
+execute if score "blarion_is_still_alive" "blarion:script_running" matches 0 run tellraw @a {"rawtext":[{"text":"§r§4[§cBlarion§4]§c Fatal Hack Detected: Script API was killed!"}]}
+execute if score "blarion_is_still_alive" "blarion:script_running" matches 0 run tellraw @a {"rawtext":[{"text":"§r§4[§cBlarion§4]§c session will shut down FORCE after 3s..."}]}
+execute if score "blarion_is_still_alive" "blarion:script_running" matches 0 as @a at @s run playsound note.pling @s ~ ~ ~ 100000
+execute if score "blarion_is_still_alive" "blarion:script_running" matches 0 run schedule delay add security/shutdown 3S append
