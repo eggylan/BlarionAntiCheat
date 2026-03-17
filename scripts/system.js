@@ -1,7 +1,9 @@
 import { world, system, ItemStack, CustomCommandParamType,GameMode } from "@minecraft/server";
 import { ActionFormData, ModalFormData, MessageFormData, uiManager } from "@minecraft/server-ui"
 import { transferPlayer, beforeEvents } from "@minecraft/server-admin";
+import { flag } from "./util.js";
 import config from "config.js";
+
 
 system.beforeEvents.startup.subscribe((startupOptions) => {
 	startupOptions.customCommandRegistry.registerCommand(
@@ -133,7 +135,7 @@ system.beforeEvents.startup.subscribe((startupOptions) => {
 			name: "blarion:blac",
 			cheatsRequired: true,
 			description: "Blarion Anticheat Main Command",
-			permissionLevel: 1,
+			permissionLevel: 0,
 			mandatoryParameters: [
 				{ name: "blarion:main_options", type: "Enum" }
 			]
@@ -143,6 +145,7 @@ system.beforeEvents.startup.subscribe((startupOptions) => {
 
 			switch (option) {
 				case "help":
+					if (caller.commandPermissionLevel < 1) return;
 					caller.sendMessage("§r§9[§bBlarion§9]§r Command List:");
 					for (const [cmd, data] of Object.entries(commandList)) {
 						caller.sendMessage(`§b◆ /${cmd} §7§o${data.description}`);
@@ -150,13 +153,53 @@ system.beforeEvents.startup.subscribe((startupOptions) => {
 					}
 					break;
 				case "version":
-					caller.sendMessage("§r§9[§bBlarion§9]§r Blarion is now version §b2.1.1 §gBETA");
+					caller.sendMessage("§r§9[§bBlarion§9]§r Blarion is now version §b2.1.4 §aRELEASE (Private version, DO NOT DISTRIBUTE!!)");
 					break;
 				case "credits":
-					caller.sendMessage("§r§9[§bBlarion§9]§r Credits:\nNyaCrasin");
+					caller.sendMessage("§r§9[§bBlarion§9]§r Credits:\nNyaCrasin | Main developer, Detection provider, hack principle cracker\nNexShell | Game cheat/hack packet data provider\nsen24833541 | Hack client provider");
 					break;
 
 			}
+
+			return { status: 0 };
+		}
+	);
+
+	startupOptions.customCommandRegistry.registerEnum("blarion:modules", Object.keys(config.modules));
+
+	startupOptions.customCommandRegistry.registerCommand(
+		{
+			name: "blarion:flag",
+			cheatsRequired: true,
+			description: "Raise a cheat flag through extra anticheat",
+			permissionLevel: 2,
+			mandatoryParameters: [
+				{ name: "target", type: "PlayerSelector" },
+				{ name: "blarion:modules", type: "Enum" }
+			],
+			optionalParameters: [
+				{ name: "hackType", type: "String" },
+				{ name: "debugData", type: "String" },
+				{ name: "shouldTP", type: "Boolean" },
+				{ name: "addTotalVL", type: "Boolean" },
+				{ name: "checkTypeShowWhenKick", type: "String" }
+			]
+		},
+		(origin, targetRaw, moduleName, hackType = "External",debugData, shouldTP,addTotalVL,showWhenKick) => {
+			const caller = origin.sourceEntity;
+
+			if (targetRaw.length > 1) return { status: 1, message: `§cToo many target expect 1 but receive ${targetRaw.length}` };
+			else if (targetRaw.length < 1) return { status: 1, message: "§cCould not find that player" };
+
+			const target = world.getEntity(targetRaw[0].id);
+
+			system.run(() => {
+				try {
+					flag(target, moduleName.substr(0, moduleName.length - 1), moduleName.at(-1), hackType,debugData, shouldTP, addTotalVL, showWhenKick);
+				} catch (error) {
+					if (caller) caller.sendMessage(`§r§4[§cBlarion§4]§c ${error}`);
+				}
+			});
 
 			return { status: 0 };
 		}

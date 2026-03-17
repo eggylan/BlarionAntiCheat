@@ -19,9 +19,6 @@
 					"right",
 					"sneak",
 					"jump",
-					// "illegals",
-					// "illegals2",
-					// "cbeitems",
 					"move",
 					"autototem",
 					"autoshield",
@@ -32,7 +29,6 @@
 					"sleep",
 					"trident",
 					"everyFrame"
-					// "invalid_offhand"
 				]
 			},
 			"animations": {
@@ -47,9 +43,6 @@
 				"right": "controller.animation.right",
 				"sneak": "controller.animation.sneak",
 				"jump": "controller.animation.jump",
-				// "illegals": "controller.animation.illegals",
-				// "illegals2": "controller.animation.illegals2",
-				// "cbeitems": "controller.animation.cbeitems",
 				"move": "controller.animation.move",
 				"autototem": "controller.animation.autototem",
 				"autoshield": "controller.animation.autoshield",
@@ -60,7 +53,6 @@
 				"sleep": "controller.animation.sleep",
 				"trident": "controller.animation.trident",
 				"everyFrame": "animation.everyFrame"
-				// "invalid_offhand": "controller.animation.invalid_offhand"
 			}
 		},
 		"component_groups": {
@@ -140,8 +132,6 @@
 				}
 			},
 			"scythe:kick": {
-				// https://discord.com/channels/879970475483217940/933913999765024818/1022005158865031188
-				// new kick method by Tutinoko9900#1841
 				"minecraft:explode": {
 					"fuse_length": 0,
 					"fuse_lit": true,
@@ -191,16 +181,18 @@
 				"value": 0.1
 			},
 			"minecraft:hurt_on_condition": {
-				"damage_conditions": [{
-					"filters": {
-						"test": "in_lava",
-						"subject": "self",
-						"operator": "==",
-						"value": true
-					},
-					"cause": "lava",
-					"damage_per_tick": 4
-				}]
+				"damage_conditions": [
+					{
+						"filters": {
+							"test": "in_lava",
+							"subject": "self",
+							"operator": "==",
+							"value": true
+						},
+						"cause": "lava",
+						"damage_per_tick": 4
+					}
+				]
 			},
 			"minecraft:attack": {
 				"damage": 1
@@ -214,7 +206,8 @@
 				"damage": 0.1,
 				"walk": 0.0,
 				"sprint": 0.1,
-				"swim": 0.01
+				"swim": 0.01,
+				"lunge": 4.0
 			},
 			"minecraft:player.saturation": {
 				"value": 5,
@@ -374,14 +367,15 @@
 					"parrot_tame"
 				],
 				"pull_in_entities": true,
-				"seats": [{
-						"position": [0.4, -0.2, -0.1],
+				"seats": [
+					{
+						"position": [ 0.4, -0.2, -0.1 ],
 						"min_rider_count": 0,
 						"max_rider_count": 0,
 						"lock_rider_rotation": 0
 					},
 					{
-						"position": [-0.4, -0.2, -0.1],
+						"position": [ -0.4, -0.2, -0.1 ],
 						"min_rider_count": 1,
 						"max_rider_count": 2,
 						"lock_rider_rotation": 0
@@ -803,7 +797,7 @@
 			"scythe:reset_skinid": {
 				"add": {
 					"component_groups": [
-						"scythe:reset_skinid"
+						"scythe:reset_skin_id"
 					]
 				},
 				"remove": {

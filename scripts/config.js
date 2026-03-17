@@ -180,6 +180,12 @@ export default
 			"punishment": "kick",
 			"minVlbeforePunishment": 1
 		},
+		"commandblockexploitW": {
+			"description": "Websocket command request check",
+			"enabled": true,
+			"punishment": "kick",
+			"minVlbeforePunishment": 1
+		},
 		"crasherA": {
 			"description": "Checks for teleport out of border",
 			"enabled": true,
