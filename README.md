@@ -9,7 +9,7 @@ _Blarion反作弊是一个基于Scythe反作弊开发的Minecraft基岩版行为
 Developed by NyaCrasin
 
 _由NyaCrasin着手开发_
-Details: https://www.bilibili.com/video/BV1Pt421j7tQ
+Details: https://www.bilibili.com/video/BV1fXNGzAEa2
 _演示视频请访问上面的网站，谢谢喵_
 
 # How to use?
