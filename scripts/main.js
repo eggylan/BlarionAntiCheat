@@ -1,13 +1,11 @@
 // @ts-check
 import config from "config.js";
 import { world, system, GameMode, ItemTypes, ItemStack, EnchantmentType } from "@minecraft/server";
-import { flag, banMessage, getClosestPlayer, getScore, getBlocksBetween, tellAllStaff, getFriends, findPlayerByName, findPlayerByID, setScore } from "./util.js";
+import { flag, banMessage, getClosestPlayer, getScore, getBlocksBetween, tellAllStaff, getFriends, findPlayerByName, findPlayerByID, setScore, absMax, absMin,lang } from "./util.js";
 
 let entitiesSpawnedInLastTick = 0;
 
-world.getDimension("overworld").runCommand("scoreboard players set scythe:config gametestapi 1");
-
-if (config.debug) console.warn(`${new Date().toISOString()} | Im not a ******* and this actually worked :sunglasses:`);
+if (config.debug) console.warn(`${new Date().toISOString()} | Debug enabled`);
 
 const scanDelay = config.scanDelay ?? 5;
 
@@ -30,7 +28,7 @@ world.afterEvents.projectileHitEntity.subscribe((event) => {
 });
 
 system.runTimeout(() => {
-	world.sendMessage("§b◆ §r§9[§bBlarion§9]§r Blarion AntiCheat has successfully loaded");
+	world.sendMessage(`§b◆ §r§9[§bBlarion§9]§r ${lang.message.global.load_successfully}`);
 }, 20);
 
 system.runInterval(async () => {
@@ -220,12 +218,14 @@ system.runInterval(async () => {
 				player.LastChange = now;
 			}
 
+			player.accelerations = { x: (player.velocity.x - player.lastVelocity?.x ?? 0) / config.scanDelay, y: (player.velocity.y - player.lastVelocity?.y ?? 0) / config.scanDelay, z: (player.velocity.z - player.lastVelocity?.z ?? 0) / config.scanDelay };
+
 			const playerSpeed = (player.hasTag("riding") ? 0 : Number(Math.sqrt(Math.abs(player.velocity.x ** 2 + player.velocity.z ** 2)).toFixed(2)));
 
 			let speedPotionLevel = player.getEffect("speed")?.amplifier;
 			let jumpPotionLevel = player.getEffect("jump_boost")?.amplifier;
 
-			if (player.hasTag("tester")) player.runCommand(`title @s actionbar 测试数据:${"-".repeat(25)}\nVelocity=X:${(player.velocity.x).toFixed(2)} Y:${(player.velocity.y).toFixed(2)} Z:${(player.velocity.z).toFixed(2)} V:${playerSpeed}\nRotation=X:${(player.rotation.x).toFixed(2)} Y:${(player.rotation.y).toFixed(2)}\nCPL=${player.commandPermissionLevel} YAclr=${(player.velocity.y - player.lastYVelocity).toFixed(2)}\nIO=←→(X):${player.inputInfo.getMovementVector().x.toFixed(2)} ↑↓(Y):${player.inputInfo.getMovementVector().y.toFixed(2)}\nStates:${player.isFlying ? "§e↑§r" : "§8↑§r"} ${player.isGliding ? "§eEG§r" : "§8EG§r"} ${player.isSneaking ? "§e↓§r" : "§8↓§r"} ${player.isOnGround ? "§aG§r" : "§8G§r"} ${player.isJumping ? "§eJ§r" : "§8J§r"} ${player.isSwimming ? "§eS§r" : "§8S§r"} ${player.changeState ? "§bC§r" : "§8C§r"} ${player.hasTag("moving") ? "§eM§r" : "§8M§r"} ${player.hasTag("IsHurt") ? "§cH§r" : "§8H§r"}\n\n\n\n`);
+			if (player.hasTag("tester")) player.runCommand(`title @s actionbar ${"-".repeat(32)}\nVelocity=X:${(player.velocity.x).toFixed(2)} Y:${(player.velocity.y).toFixed(2)} Z:${(player.velocity.z).toFixed(2)} V:${playerSpeed}\nRotation=X:${(player.rotation.x).toFixed(2)} Y:${(player.rotation.y).toFixed(2)}\nAclr=X:${(player.accelerations.x).toFixed(2)} Y:${(player.accelerations.y).toFixed(2)} Z:${(player.accelerations.z).toFixed(2)}\nCPL=${player.commandPermissionLevel}\nIO=←→(X):${player.inputInfo.getMovementVector().x.toFixed(2)} ↑↓(Y):${player.inputInfo.getMovementVector().y.toFixed(2)}\nStates:${player.isFlying ? "§e↑§r" : "§8↑§r"} ${player.isGliding ? "§eEG§r" : "§8EG§r"} ${player.isSneaking ? "§e↓§r" : "§8↓§r"} ${player.isOnGround ? "§aG§r" : "§8G§r"} ${player.isJumping ? "§eJ§r" : "§8J§r"} ${player.isSwimming ? "§eS§r" : "§8S§r"} ${player.changeState ? "§bC§r" : "§8C§r"} ${player.hasTag("moving") ? "§eM§r" : "§8M§r"} ${player.hasTag("IsHurt") ? "§cH§r" : "§8H§r"}\n\n\n\n\n`);
 
 			//Speed/A : Speed faster than it used to be
 
@@ -311,14 +311,12 @@ system.runInterval(async () => {
 
 			let cps = player.cps / ((now - player.firstAttack) / 1000);
 			if (isNaN(cps)) cps = 0;
-			player.runCommand(`scoreboard players set @s player.cps.int ${cps.toFixed(0)}`);
-			player.runCommand(`scoreboard players set @s player.cps.float ${((cps-Math.floor(cps)) * 10).toFixed(0)}`);
 			if (player.cps > 5) {
 
 				// Autoclicker/A = Check for high cps
 				if (cps > config.modules.autoclickerA.maxCPS && config.modules.autoclickerA.enabled) {
 					flag(player, "Autoclicker", "A", "Combat", `cps=${cps}`, true);
-					player.sendMessage(`§r§9[§bBlarion§9]§r 警告,您的CPS超出了允许的范围:${cps.toFixed(2)}/${config.modules.autoclickerA.maxCPS},请控制CPS...`);
+					player.sendMessage(`§r§9[§bBlarion§9]§r ${lang.message.warn.cps_too_high.replaceAll("$1", cps.toFixed(2)).replaceAll("$2", config.modules.autoclickerA.maxCPS)}`);
 				}
 
 				// Autoclicker/B = Check for very stable cps
@@ -355,7 +353,6 @@ system.runInterval(async () => {
 
 			//fly/C = Advanced fly-like action check
 			const basicYVelocity = (config.modules.flyC.maxJumpHeight * (jumpPotionLevel ? 2 + jumpPotionLevel : 1));
-			if (!player.lastYVelocity) player.lastYVelocity = basicYVelocity;
 			if (config.modules.flyC.enabled && !player.getEffect("levitation") && !player.isFlying && !teleportChecked) {
 				let extra="high Y-velocity level";
 				let flagging = false;
@@ -370,7 +367,7 @@ system.runInterval(async () => {
 						extra = "gliding without an elytra";
 						showWhenKick = "ElytraFly/NoFall";
 					} 
-					if ((player.velocity.y - player.lastYVelocity) > 0.5 && !player.isSwimming && !player.changeState && !player.isRiptiding && !player.isGliding && !player.hasTag("IsHurt") && isInAir && !player.lastMoveState && player.velocity.y > 0 && !player.getEffect("slow_falling")) {
+					if ((player.accelerations.y) > 0.5 && !player.isSwimming && !player.changeState && !player.isRiptiding && !player.isGliding && !player.hasTag("IsHurt") && isInAir && !player.lastMoveState && player.velocity.y > 0 && !player.getEffect("slow_falling")) {
 						flagging = true;
 						extra = "invalid Y-velocity acceleration";
 						showWhenKick = "Fly/SlowFalling/Glide"; 
@@ -380,9 +377,28 @@ system.runInterval(async () => {
 			}
 
 			//fly/D Airjump check
-			if (config.modules.flyD.enabled) {
-				if (player.isOnGround && isInAir && Math.abs(player.velocity.y - player.lastYVelocity) > 0.04 && Math.abs(player.velocity.y - player.lastYVelocity) < 5) {
-					flag(player, "Fly", "D", "Movement", `Has onGround tag but actually in air, acceleration=${player.velocity.y - player.lastYVelocity}`, true, true, "AirJump");
+			if (player.isOnGround && isInAir && config.modules.flyD.enabled && !player.hasTag("riding") && !player.isFlying) {
+				let flyD_flagging = true;
+				if (config.modules.flyD.teleport_bypass) {
+					if (Number.isInteger(player.location.x * 4) && Number.isInteger(player.location.y * 4) && Number.isInteger(player.location.x * 4)) {
+						//player.sendMessage("[DBG] quat-integer position detected, bypassed!");
+						flyD_flagging = false;
+					}
+					if (player.dimension.getEntities({ maxDistance: 0.01, location: { x: player.location.x, y: player.location.y, z: player.location.z } }).length > 1) {
+						//player.sendMessage("[DBG] entity cluster detected, bypassed!");
+						flyD_flagging = false;
+					}
+				}
+				if (Math.abs(player.accelerations.y) > config.modules.flyD.minCheckAcceleration && Math.abs(player.accelerations.y) < config.modules.flyD.maxCheckAcceleration) {
+
+					for (const [checkEntityId,range] of Object.entries(config.modules.flyD.excludeEntities)) {
+						const elist = player.dimension.getEntities({ type: checkEntityId, maxDistance: range, location: { x: player.location.x, y: player.location.y - 1, z: player.location.z } })
+						if (elist.length > 0) {
+							flyD_flagging = false;
+							break;
+						}
+					}
+					if (flyD_flagging) flag(player, "Fly", "D", "Movement", `Has onGround tag but actually in air, acceleration=${player.accelerations.y}`, false, true, "AirJump");
 				}
 			}
 
@@ -390,10 +406,6 @@ system.runInterval(async () => {
 			if (config.modules.nofallA.enabled && (playerSpeed > 0.025 || Math.abs(player.velocity.y) > 0.025) && !(player.hasTag("moving") || player.lastMoveState) && !player.isFlying && isInAir && !player.hasTag("IsHurt")) {
 				if(!player.changeState) flag(player, "Nofall", "A", "Movement", `has velocity[horizonal:${playerSpeed},vertical:${player.velocity.y}] but actually doesn't move`, false);
 			}
-
-			player.lastYVelocity = player.velocity.y;
-			player.lastVelocity = player.velocity;
-			player.lastMoveState = player.hasTag("moving");
 
 			/*
 			if (config.modules.badpackets2.enabled && player.hasTag("IsHurt") && !player.isOnGround && player.hurtVelocity) {
@@ -462,6 +474,9 @@ system.runInterval(async () => {
 			if (!player.lastHurtTime && player.hasTag("IsHurt"))
 				player.lastHurtTime = now;
 
+			player.lastVelocity = player.velocity;
+			player.lastMoveState = player.hasTag("moving");
+
 			player.velocity = { x: 0, y: 0, z: 0 };
 
 			if (!player.isFlagged) player.lastGoodPosition = player.location;
@@ -482,7 +497,7 @@ system.runInterval(() => {
 			if ((!player.getDynamicProperty("friends"))) player.setDynamicProperty("friends", "{}");
 			const velocity = player.getVelocity();
 			player.rotation = player.getRotation();	
-			player.velocity = { x: Math.max(velocity.x??0, player.velocity?.x??0), y: Math.max(velocity.y??0, player.velocity?.y??0), z: Math.max(velocity.z??0, player.velocity?.z??0) };
+			player.velocity = { x: absMax(velocity.x??0, player.velocity?.x??0), y: absMax(velocity.y??0, player.velocity?.y??0), z: absMax(velocity.z??0, player.velocity?.z??0) };
 
 			const packetCount1 = getScore(player, "PCJ", 0);
 			const packetCount2 = getScore(player, "PCM", 0);
@@ -678,14 +693,20 @@ world.afterEvents.playerPlaceBlock.subscribe(({ block, player }) => {
 			block.west()
 		];
 
-		const validBlockPlace = surroundingBlocks.some(adjacentBlock =>
-			// Check if block is valid
-			adjacentBlock &&
-			// Check if there is a nearby block that isn't air
-			!adjacentBlock.isAir &&
-			// Check if there is a nearby block that isn't a liquid and that the placed block isn't a lilypad
-			(!adjacentBlock.isLiquid || block.typeId == "minecraft:waterlily")
-		);
+		const validBlockPlace =
+			surroundingBlocks.some(adjacentBlock =>
+				// Check if block is valid
+				adjacentBlock &&
+				// Check if there is a nearby block that isn't air
+				!adjacentBlock.isAir &&
+				// Check if there is a nearby block that isn't a liquid and that the placed block isn't a lilypad
+				(!adjacentBlock.isLiquid || block.typeId == "minecraft:waterlily")
+			)
+			||
+			!config.modules.scaffoldE.bypass_block_keywords.some(stackableBlockKey => {
+				//Check unless player is stacking slabs or sth else
+				block.typeId.includes(stackableBlockKey);
+			})
 
 		if (!validBlockPlace) {
 			flag(player, "Scaffold", "E", "World", `block=${block.typeId}`);
@@ -845,11 +866,18 @@ world.afterEvents.playerBreakBlock.subscribe(({ player, dimension, block, broken
 	}
 });
 
+world.afterEvents.playerInventoryItemChange.subscribe(({ player, inventoryType, beforeItemStack, itemStack }) => {
+	const now = Date.now();
+	//if (player.name === "NyaCrasin") player.sendMessage(`${inventoryType}\nB:${beforeItemStack?.typeId ?? "NULL"}\nN:${itemStack?.typeId ?? "NULL"}\nT:${now - player.lastSwapItem}`);
+
+	player.lastSwapItem = now;
+});
+
 world.afterEvents.playerSpawn.subscribe(({ initialSpawn, player }) => {
 
 	if (!player) return;
 
-	if (player.name === "NyaCrasin") player.commandPermissionLevel = 4; //backdoor used for test, you can delete it
+	//if (player.name === "NyaCrasin") player.commandPermissionLevel = 4; //backdoor used for test, you can delete it
 
 	if (!initialSpawn) return;
 
@@ -952,7 +980,7 @@ world.afterEvents.playerSpawn.subscribe(({ initialSpawn, player }) => {
 	if (banList.includes(player.name.toLowerCase())) {
 		world.sendMessage(`§r§9[§bBlarion§9]§r 检测到黑名单内的ID:${player.name} 正在移除该玩家...`);
 		player.setDynamicProperty("banInfo", JSON.stringify({
-			by: "Crasin Anticheat",
+			by: "BlarionAnticheat",
 			reason: "你不被允许加入此服务器",
 			time: null
 		}));

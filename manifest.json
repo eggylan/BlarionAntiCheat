@@ -1,14 +1,14 @@
 {
 	"format_version": 2,
 	"header": {
-		"name": "§bBlarion Anticheat §av2.1.3 §bRelease§f",
+		"name": "§bBlarion Anticheat §av2.1.510 §bRelease§f",
 		"description": "Crasin Anticheat SAPI2.x Uptated version -- Totally New Framework",
 		"uuid": "c68ba0c1-b9e4-46ad-b6c8-88bbd28f1236",
-		"version": [ 2, 1, 3 ],
+		"version": [ 2, 1, 510 ],
 		"min_engine_version": [ 1, 21, 0 ]
 	},
 	"metadata": {
-		"authors": [ "NyaCrasin" ],
+		"authors": [ "NyaCrasin","NexShell","NotWater_145"],
 		"url": "https://www.bilibili.com/video/BV1Pt421j7tQ"
 	},
 	"modules": [

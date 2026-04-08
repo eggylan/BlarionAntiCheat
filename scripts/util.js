@@ -1,6 +1,14 @@
 // @ts-check
 import config from "config.js";
-import { world,system } from "@minecraft/server";
+import { world, system } from "@minecraft/server";
+
+export let lang = {};
+
+export function setlang(data) {
+    lang = data;
+}
+
+import(`./lang/${config.language}.js`);
 
 /**
  * @name flag
@@ -15,6 +23,7 @@ import { world,system } from "@minecraft/server";
  * @example flag(player, "Spammer", "B", "Combat", undefined, undefined, undefined, msg, undefined);
  * @remarks Alerts staff if a player is hacking.
  */
+
 export function flag(player, check, checkType, hackType, debug, shouldTP = false,addTotalVL=true,showWhenKick=check , cancelObject, slot) {
     // validate that required params are defined
     if(typeof player !== "object") throw TypeError(`Error: player is type of ${typeof player}. Expected "object"`);
@@ -118,9 +127,9 @@ export function flag(player, check, checkType, hackType, debug, shouldTP = false
     currentVl++;
 
     if(debug) {
-        tellAllStaff(`§b◆ §r§9[§bBlarion§9]§r ${player.name}§r §ehas triggered §b(${hackType}) §a${check}/${checkType.toUpperCase()} §7(${debug}§r§7).§c VL= ${currentVl}`, ["notify"]);
+        tellAllStaff(`§b◆ §r§9[§bBlarion§9]§r ${player.name}§r §e=> §b(${hackType}) §a${check}/${checkType.toUpperCase()} §7(${debug}§r§7).§c VL= ${currentVl}`, ["notify"]);
     } else {
-        tellAllStaff(`§b◆ §r§9[§bBlarion§9]§r ${player.name}§r §ehas triggered §b(${hackType}) §a${check}/${checkType.toUpperCase()}. §cVL= ${currentVl}`, ["notify"]);
+        tellAllStaff(`§b◆ §r§9[§bBlarion§9]§r ${player.name}§r §e=> §b(${hackType}) §a${check}/${checkType.toUpperCase()}. §cVL= ${currentVl}`, ["notify"]);
     }
 
     if (now - (player.lastFlag ?? 0) > 10000) {
@@ -146,20 +155,17 @@ export function flag(player, check, checkType, hackType, debug, shouldTP = false
 
     switch (punishment) {
         case "kick": {
-            world.sendMessage(`§r§9[§bBlarion§9]§r 玩家 ${player.name} 因为作弊即将被踢出游戏，触发的检测:${showWhenKick}`);
+            world.sendMessage(`§r§9[§bBlarion§9]§r ${lang.message.global.kick.replaceAll("$1", player.name).replaceAll("$2", showWhenKick)}`);
 
-
-            ;
-            system.run(async () => {player.runCommand(`title @s subtitle §r§o§c3s后断开与您的连接`)});;
             if(!player.hasTag("op"))    player.isInKickQueue = true;
             system.runTimeout(() => {
-                if (!player.hasTag("op")) disconnect(player, `§r\n§9[§bBlarion§9]§r 检测到您存在违规行为. \n类型: ${showWhenKick}`, true);
+                if (!player.hasTag("op")) disconnect(player, `§r\n§9[§bBlarion§9]§r ${lang.message.disconnect.kick.replaceAll("$1", player.name).replaceAll("$2", showWhenKick)}`, true);
             }, 60);
             break;
         }
 
         case "ban": {
-            world.sendMessage(`§r§9[§bBlarion§9]§r 玩家 ${player.name} 因为作弊被封禁，触发的检测:${showWhenKick}`);
+            world.sendMessage(`§r§9[§bBlarion§9]§r ${lang.message.global.ban.replaceAll("$1", player.name).replaceAll("$2", showWhenKick)}`);
             if (!config.autoban) break;
             const punishmentLength = checkData.punishmentLength?.toLowerCase();
             let banLength;
@@ -177,7 +183,7 @@ export function flag(player, check, checkType, hackType, debug, shouldTP = false
         }
 
         case "mute": {
-            world.sendMessage(`§r§9[§bBlarion§9]§r 玩家 ${player.name} 因为滥发信息被禁言，触发的检测:${showWhenKick}`);
+            world.sendMessage(`§r§9[§bBlarion§9]§r ${lang.message.global.mute.replaceAll("$1", player.name).replaceAll("$2", showWhenKick)}`);
             player.addTag("isMuted");
 
             // remove chat ability
@@ -187,7 +193,7 @@ export function flag(player, check, checkType, hackType, debug, shouldTP = false
         }
 
         case "freeze": {
-            world.sendMessage(`§r§9[§bBlarion§9]§r 玩家 ${player.name} 因为作弊被锁定，触发的检测:${showWhenKick}`);
+            world.sendMessage(`§r§9[§bBlarion§9]§r ${lang.message.global.freeze.replaceAll("$1", player.name).replaceAll("$2", showWhenKick)}`);
             player.addEffect("weakness", 99999, {
                 amplifier: 255,
                 showParticles: false
@@ -199,7 +205,7 @@ export function flag(player, check, checkType, hackType, debug, shouldTP = false
         }
 
         case "imprison": {
-            world.sendMessage(`§r§9[§bBlarion§9]§r 玩家 ${player.name} 因为作弊被加入管制队列，触发的检测:${showWhenKick}`);
+            world.sendMessage(`§r§9[§bBlarion§9]§r ${lang.message.global.imprison.replaceAll("$1", player.name).replaceAll("$2", showWhenKick)}`);
             player.addTag("imprison");
 
             break;
@@ -269,7 +275,6 @@ export function banMessage(player) {
     }
 
     tellAllStaff(`§r§9[§bBlarion§9]§r ${player.name} was kicked for being banned. Ban Reason: ${reason ?? "You are banned!"}.`);
-    world.sendMessage(`§r§9[§bBlarion§9]§r 检测到被封禁的玩家:${player.id},正在踢出...`);
     disconnect(player,`§l§cYOU ARE BANNED!\n§eBanned By:§r ${by ?? "N/A"}\n§bReason:§r ${reason ?? "N/A"}\n§aBan Length:§r ${friendlyTime || "Permanent"}`);
 }
 
@@ -518,20 +523,30 @@ export function alertAllStaff(tags = ["op"]) {
     }
 }
 
-export function hasBanWord(str) {
-    str = String(str);
-    let ret = false;
-    for (let i = 0; i < bw.foul.length; i++) {
-        if (str.includes(bw.foul[i])) {
-            ret = true;
-            break;
-        }
-    }
-    return ret;
-}
-
 export function getFriends(player) {
     if (!player.getDynamicProperty("friends"))
         return undefined;
     return JSON.parse(player.getDynamicProperty("friends"));
+}
+
+export function absMax(...numbers) {
+    let absMaxium = 0;
+    numbers.forEach(n => {
+        if (Math.abs(n) > Math.abs(absMaxium)) {
+            absMaxium = n;
+        }
+    });
+
+    return absMaxium;
+}
+
+export function absMin(...numbers) {
+    let absMinium = 0;
+    numbers.forEach(n => {
+        if (Math.abs(n) > Math.abs(absMinium)) {
+            absMinium = n;
+        }
+    });
+
+    return absMinium;
 }

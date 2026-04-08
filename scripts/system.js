@@ -1,9 +1,8 @@
 import { world, system, ItemStack, CustomCommandParamType,GameMode } from "@minecraft/server";
 import { ActionFormData, ModalFormData, MessageFormData, uiManager } from "@minecraft/server-ui"
 import { transferPlayer, beforeEvents } from "@minecraft/server-admin";
-import { flag } from "./util.js";
+import { flag,lang } from "./util.js";
 import config from "config.js";
-
 
 system.beforeEvents.startup.subscribe((startupOptions) => {
 	startupOptions.customCommandRegistry.registerCommand(
@@ -153,10 +152,10 @@ system.beforeEvents.startup.subscribe((startupOptions) => {
 					}
 					break;
 				case "version":
-					caller.sendMessage("§r§9[§bBlarion§9]§r Blarion is now version §b2.1.4 §aRELEASE (Private version, DO NOT DISTRIBUTE!!)");
+					caller.sendMessage("§r§9[§bBlarion§9]§r Blarion is now version §b2.1.5 §bRelease (Github Published)");
 					break;
 				case "credits":
-					caller.sendMessage("§r§9[§bBlarion§9]§r Credits:\nNyaCrasin | Main developer, Detection provider, hack principle cracker\nNexShell | Game cheat/hack packet data provider\nsen24833541 | Hack client provider");
+					caller.sendMessage("§r§9[§bBlarion§9]§r Credits:\nNyaCrasin | Main developer, Detection provider, hack principle cracker\nNexShell | Game cheat/hack packet data provider\nNotWater_145 | Hack client provider");
 					break;
 
 			}
@@ -206,24 +205,32 @@ system.beforeEvents.startup.subscribe((startupOptions) => {
 	);
 });
 
-const commandList = {
-	"blac":{
-		description: "this command",
-		usage:"<help|version|credits>"
-	},
-	"getinv": {
-		description: "to get someone's inventory",
-		usage: "<player>"
-	},
-	"forcekick": {
-		description:"to despawn and erase entity data of player that uses AntiKick hack",
-		usage:"<player>"
-	},
-	"scan": {
-		description: "to scan NBT cheaters, still Work In Progress",
-		usage: "[player]"
+let commandList;
+
+system.runTimeout(() => {
+	commandList = {
+		"blac": {
+			description: lang.commands.description.blac,
+			usage: "<help|version|credits>"
+		},
+		"getinv": {
+			description: lang.commands.description.getinv,
+			usage: "<player>"
+		},
+		"forcekick": {
+			description: lang.commands.description.forcekick,
+			usage: "<player>"
+		},
+		"scan": {
+			description: lang.commands.description.scan,
+			usage: "[player]"
+		},
+		"flag": {
+			description: lang.commands.description.flag,
+			usage: "<player> <module_name> [hack_type] [dbg] [should_drag_back] [add_total_violations]"
+		}
 	}
-}
+},1);
 function scanPlayer(p) {
 	let cheats = 0;
 	const gamemode = p.getGameMode();
@@ -281,17 +288,17 @@ function scanPlayer(p) {
 
 if (config.force_op_blocker.enabled) {
 	system.runTimeout(async () => {
-		console.warn(`[Blarion-Blocker] proxy blocker online`);
+
 		beforeEvents.asyncPlayerJoin.subscribe((event) => {
 			console.warn(`[Blarion-Blocker] PlayerJoin Detected: \nName:${event.name} PID:${event.persistentId}`);
 			if (event.persistentId.replaceAll(" ", "") == "") {
 				console.warn(`[Blarion-Blocker] LoginRefused: ${event.name} PFID:${event.persistentId}`);
-				if(config.force_op_blocker.send_global_alert) world.sendMessage(`§a◆ §r§2[§aBlarion§2]§r Blocked ForceOP Proxy Player: ${event.name}`);
+				if (config.force_op_blocker.send_global_alert) world.sendMessage(`§a◆ §r§2[§aBlarion§2]§r Blocked Connect Session: ${event.name}`);
 				event.disconnect(`[Blarion] Connection Rejected: Unexpected client data`);
 				return false;
 			} else if (config.force_op_blocker.mode !== "lite" && (event.name.length <= 3 || event.name.length >= 32 || /[^a-zA-Z0-9\s\-_]/.test(event.name))) {
 				console.warn(`[Blarion-Blocker] LoginRefused: ${event.name} PFID:${event.persistentId}`);
-				if (config.force_op_blocker.send_global_alert) world.sendMessage(`§a◆ §r§2[§aBlarion§2]§r Blocked ForceOP Proxy Player: ${event.name}`);
+				if (config.force_op_blocker.send_global_alert) world.sendMessage(`§a◆ §r§2[§aBlarion§2]§r Blocked Connect Session: ${event.name}`);
 				event.disconnect(`[Blarion] Connection Rejected: Unexpected client data`);
 				return false;
 			} else {
@@ -299,6 +306,8 @@ if (config.force_op_blocker.enabled) {
 				return true;
 			}
 		});
+
+		world.sendMessage(`§a◆ §r§2[§aBlarion§2]§r ${lang.message.global.block_system_loaded}`)
 	}, 200)
 }
 
